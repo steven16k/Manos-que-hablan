@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Preguntas</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 50px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 10px;
+            position: relative;
+        }
+
+        .question {
+            font-size: 2vw;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .options li {
+            flex: 1 1 calc(50% - 10px);
+        }
+
+        .options button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2vw;
+            cursor: pointer;
+            background-color: #87CEEB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .flash {
+            animation: flash 0.5s;
+        }
+
+        @keyframes flash {
+            0%, 100% {
+                background-color: rgba(255, 0, 0, 0);
+            }
+            50% {
+                background-color: rgba(255, 0, 0, 0.5);
+            }
+        }
+
+        .next-button {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2vw;
+            color: white;
+            background-color: green;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            bottom: -50px;
+        }
+
+        .camera-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #28a745;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .camera-button img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .camera-view {
+            display: none;
+            position: absolute;
+            top: -203px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 268px;
+            height: 200px;
+            border: 2px solid #000;
+        }
+
+        @media (max-width: 768px) {
+            .question {
+                font-size: 4vw;
+            }
+
+            .options button {
+                font-size: 3.5vw;
+            }
+
+            .next-button {
+                bottom: -30px;
+            }
+
+            .camera-button {
+                width: 40px;
+                height: 40px;
+            }
+
+            .camera-button img {
+                width: 25px;
+                height: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .question {
+                font-size: 5vw;
+            }
+
+            .options button {
+                padding: 10px;
+                font-size: 4vw;
+            }
+
+            .next-button {
+                font-size: 4vw;
+                bottom: -20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="question" id="question">¿Cuál es la capital de Francia?</div>
+        <ul class="options">
+            <li><button onclick="checkAnswer(this, false)">Madrid</button></li>
+            <li><button onclick="checkAnswer(this, false)">Berlín</button></li>
+            <li><button onclick="checkAnswer(this, true)">París</button></li>
+            <li><button onclick="checkAnswer(this, false)">Lisboa</button></li>
+        </ul>
+        <button class="next-button" onclick="nextQuestion()">Siguiente</button>
+        <button class="camera-button" onclick="toggleCamera()">
+            <img src="img/mano_interactive.png" alt=""> </button>
+        <video class="camera-view" id="cameraView" autoplay></video>
+    </div>
+    <canvas class="confetti"></canvas>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Quien escribio el himno nacional?",
+                options: ["Salomón Ibarra Mayorga", "Ruben dario", "Jorge Salomón Mayorga", "Lisboa"],
+                correct: 0
+            },
+            {
+                question: "¿Cuál es la capital de nicaragua?",
+                options: ["Madrid", "Managua", "París", "Lisboa"],
+                correct: 1
+            },
+            {
+                question: "¿Como se llama el lago mas grande de managua?",
+                options: ["Xiloá", "Asososca", "Acahualinca", "Xolotlán"],
+                correct: 3
+            },
+            {
+                question: "¿Como se llama el lago artificial que genera energia hidroelectrica?",
+                options: ["río Jigüina", "Tuma", "Apanás", "río San Gabriel"],
+                correct: 2
+            },
+            {
+                question: "¿Cuál es la Flor nacional?",
+                options: ["Sacuanjoche", "Mil flores", "Sacanjoche", "Malinche"],
+                correct: 0
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let confettiInterval;
+        let cameraStream;
+
+        function loadQuestion(index) {
+            const questionElement = document.getElementById('question');
+            const optionsElements = document.querySelectorAll('.options button');
+            questionElement.textContent = questions[index].question;
+            optionsElements.forEach((button, i) => {
+                button.textContent = questions[index].options[i];
+                button.onclick = () => checkAnswer(button, i === questions[index].correct);
+            });
+        }
+
+        function checkAnswer(button, isCorrect) {
+            if (isCorrect) {
+                showConfetti();
+                setTimeout(showNextButton, 3000);
+            } else {
+                flashScreen();
+            }
+        }
+
+        function showConfetti() {
+            const confettiCanvas = document.querySelector('.confetti');
+            const confetti = confettiCanvas.getContext('2d');
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+
+            const particles = [];
+            const particleCount = 300;
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height,
+                    r: Math.random() * 4 + 1,
+                    d: Math.random() * particleCount,
+                    color: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
+                    tilt: Math.random() * 10 - 10
+                });
+            }
+
+            function draw() {
+                confetti.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                particles.forEach(p => {
+                    confetti.beginPath();
+                    confetti.lineWidth = p.r;
+                    confetti.strokeStyle = p.color;
+                    confetti.moveTo(p.x + p.tilt + p.r, p.y);
+                    confetti.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+                    confetti.stroke();
+                });
+                update();
+            }
+
+            function update() {
+                particles.forEach(p => {
+                    p.y += Math.cos(p.d) + 1 + p.r / 2;
+                    p.x += Math.sin(p.d);
+                    if (p.x > confettiCanvas.width + 5 || p.x < -5 || p.y > confettiCanvas.height) {
+                        if (Math.random() > 0.5) {
+                            p.x = Math.random() * confettiCanvas.width;
+                            p.y = -10;
+                        } else {
+                            p.x = -10;
+                            p.y = Math.random() * confettiCanvas.height;
+                        }
+                    }
+                });
+            }
+
+            confettiInterval = setInterval(draw, 20);
+        }
+
+        function flashScreen() {
+            document.body.classList.add('flash');
+            setTimeout(() => {
+                document.body.classList.remove('flash');
+            }, 500);
+        }
+
+        function showNextButton() {
+            const nextButton = document.querySelector('.next-button');
+            nextButton.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            clearInterval(confettiInterval);
+            const confettiCanvas = document.querySelector('.confetti');
+            const confetti = confettiCanvas.getContext('2d');
+            confetti.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion(currentQuestionIndex);
+                document.querySelector('.next-button').style.display = 'none';
+            } else {
+                alert('Has completado todas las preguntas');
+            }
+        }
+
+        function toggleCamera() {
+            const cameraView = document.getElementById('cameraView');
+            if (cameraView.style.display === 'none') {
+                cameraView.style.display = 'block';
+                startCamera();
+            } else {
+                cameraView.style.display = 'none';
+                stopCamera();
+            }
+        }
+
+        function startCamera() {
+            const cameraView = document.getElementById('cameraView');
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    cameraStream = stream;
+                    cameraView.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error("Error accessing camera: ", err);
+                });
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        // Cargar la primera pregunta al inicio
+        loadQuestion(currentQuestionIndex);
+    </script>
+</body>
+
+</html>

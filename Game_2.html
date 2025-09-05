@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto Señas</title>
+    <!-- Enlace a la biblioteca Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Enlace a nuestro archivo de estilos CSS -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            max-width: 90%;
+            margin: auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .page {
+            display: none;
+            width: 100%;
+        }
+
+        .page.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background-color: #f06292;
+            /* Un fuchsia-600 aproximado */
+            color: white;
+            border-radius: 9999px;
+            /* rounded-full */
+            font-weight: bold;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* shadow-lg */
+            transition-property: transform;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+            transform: scale(1);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            background-color: #c2185b;
+            /* Un fuchsia-700 aproximado */
+        }
+
+        .game-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 1rem;
+            /* rounded-2xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* shadow-md */
+            transition: all 300ms ease-in-out;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            /* hover:shadow-xl */
+            transform: scale(1.05);
+        }
+
+        .vocabulary-item {
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            background-color: #e8eaf6;
+            /* indigo-100 */
+            color: #311b92;
+            /* indigo-800 */
+            border-radius: 0.5rem;
+            /* rounded-lg */
+            cursor: pointer;
+            transition: background-color 200ms ease-in-out;
+        }
+
+        .vocabulary-item:hover {
+            background-color: #c5cae9;
+            /* indigo-200 */
+        }
+
+        .vocabulary-item.active-word {
+            background-color: #3949ab;
+            /* indigo-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* shadow-md */
+        }
+
+        .sign-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+            min-height: 200px;
+        }
+
+        .sign-image {
+            max-width: 250px;
+            height: auto;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Estilos específicos para la página de login */
+        #login-page {
+            background: url('') no-repeat center center;
+            background-size: cover;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+
+        <!-- Login Page (index.html) -->
+        <div id="login-page" class="page active">
+            <div class="card w-full sm:w-2/3 lg:w-1/2">
+                <h1 class="text-4xl font-extrabold text-indigo-700 mb-4">¡Bienvenido a Proyecto Señas! 👋</h1>
+                <p class="text-lg text-gray-600 mb-6">Escribe tu nombre para empezar a aprender</p>
+                <form id="loginForm" class="flex flex-col items-center">
+                    <input type="text" id="nombreUsuario" placeholder="Tu nombre" required
+                        class="w-full px-4 py-3 mb-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" class="btn">¡Empezar ! ✨</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Games Menu Page (juegos/index.html) -->
+        <div id="menu-page" class="page">
+            <div class="card w-full">
+                <h1 id="menu-title" class="text-3xl font-bold text-indigo-700 mb-6"></h1>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div id="numeros-card" class="game-card">
+                        <span class="text-6xl mb-4">🔢</span>
+                        <h2 class="text-xl font-semibold">Números</h2>
+                    </div>
+                    <div id="colores-card" class="game-card">
+                        <span class="text-6xl mb-4">🎨</span>
+                        <h2 class="text-xl font-semibold">Colores</h2>
+                    </div>
+                    <div id="activos-card" class="game-card">
+                        <span class="text-6xl mb-4">💬</span>
+                        <h2 class="text-xl font-semibold">Vocabulario</h2>
+                    </div>
+                </div>
+                <button onclick="showPage('login-page')" class="mt-8 btn bg-gray-500 hover:bg-gray-600">Volver
+                    ↩️</button>
+            </div>
+        </div>
+
+        <!-- Numbers Game Page (juegos/numeros.html) -->
+        <div id="numeros-page" class="page">
+            <div class="card w-full">
+                <h1 class="text-3xl font-bold text-indigo-700 mb-6">Aprende los Números 🔢</h1>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <div data-sena-id="one" class="game-card">
+                        <span class="text-6xl">1️⃣</span>
+                    </div>
+                    <div data-sena-id="two" class="game-card">
+                        <span class="text-6xl">2️⃣</span>
+                    </div>
+                    <div data-sena-id="three" class="game-card">
+                        <span class="text-6xl">3️⃣</span>
+                    </div>
+                    <div data-sena-id="four" class="game-card">
+                        <span class="text-6xl">4️⃣</span>
+                    </div>
+                    <div data-sena-id="five" class="game-card">
+                        <span class="text-6xl">5️⃣</span>
+                    </div>
+                </div>
+                <div class="sign-display">
+                    <img id="numero-sena" class="sign-image" src="" alt="Seña de los números">
+                </div>
+                <button onclick="showPage('menu-page')" class="mt-8 btn bg-gray-500 hover:bg-gray-600">Volver al Menú
+                    🏡</button>
+            </div>
+        </div>
+
+        <!-- Colors Game Page (juegos/colores.html) -->
+        <div id="colores-page" class="page">
+            <div class="card w-full">
+                <h1 class="text-3xl font-bold text-indigo-700 mb-6">Aprende los Colores 🎨</h1>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <div data-sena-id="red" class="game-card">
+                        <span class="text-6xl">🔴</span>
+                        <span class="mt-2 text-sm text-gray-700">Rojo</span>
+                    </div>
+                    <div data-sena-id="blue" class="game-card">
+                        <span class="text-6xl">🔵</span>
+                        <span class="mt-2 text-sm text-gray-700">Azul</span>
+                    </div>
+                    <div data-sena-id="green" class="game-card">
+                        <span class="text-6xl">🟢</span>
+                        <span class="mt-2 text-sm text-gray-700">Verde</span>
+                    </div>
+                    <div data-sena-id="yellow" class="game-card">
+                        <span class="text-6xl">🟡</span>
+                        <span class="mt-2 text-sm text-gray-700">Amarillo</span>
+                    </div>
+                    <div data-sena-id="white" class="game-card">
+                        <span class="text-6xl">⚪</span>
+                        <span class="mt-2 text-sm text-gray-700">Blanco</span>
+                    </div>
+                </div>
+                <div class="sign-display">
+                    <img id="color-sena" class="sign-image" src="" alt="Seña de los colores">
+                </div>
+                <button onclick="showPage('menu-page')" class="mt-8 btn bg-gray-500 hover:bg-gray-600">Volver al Menú
+                    🏡</button>
+            </div>
+        </div>
+
+        <!-- Vocabulary Game Page (juegos/activos.html) -->
+        <div id="activos-page" class="page">
+            <div class="card w-full sm:w-2/3 lg:w-1/2">
+                <h1 class="text-3xl font-bold text-indigo-700 mb-6">Vocabulario Activo 💬</h1>
+                <div class="flex flex-wrap justify-center gap-2 mb-6">
+                    <div data-sena-id="hola" class="vocabulary-item">Hola 👋</div>
+                    <div data-sena-id="gracias" class="vocabulary-item">Gracias 🙏</div>
+                    <div data-sena-id="por-favor" class="vocabulary-item">Por favor 🤲</div>
+                    <div data-sena-id="si" class="vocabulary-item">Sí 👍</div>
+                    <div data-sena-id="no" class="vocabulary-item">No 👎</div>
+                    <div data-sena-id="ayuda" class="vocabulary-item">Ayuda 🆘</div>
+                    <div data-sena-id="adios" class="vocabulary-item">Adiós 👋</div>
+                </div>
+                <div class="sign-display">
+                    <img id="vocabulario-sena" class="sign-image" src="" alt="Seña del vocabulario">
+                </div>
+                <button onclick="showPage('menu-page')" class="mt-8 btn bg-gray-500 hover:bg-gray-600">Volver al Menú
+                    🏡</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Enlace a nuestro archivo de JavaScript -->
+    <script>
+        // Data for sign language gestures. Using placeholder images with descriptive text.
+// For a real app, replace these URLs with actual GIFs or videos of sign language.
+const senas = {
+    // Numbers
+    'one': "imagen abecedario",
+    'two': "https://placehold.co/200x200/5A206A/FFFFFF?text=Se%C3%B1a+de+Dos",
+    'three': "https://placehold.co/200x200/5A206A/FFFFFF?text=Se%C3%B1a+de+Tres",
+    'four': "https://placehold.co/200x200/5A206A/FFFFFF?text=Se%C3%B1a+de+Cuatro",
+    'five': "https://placehold.co/200x200/5A206A/FFFFFF?text=Se%C3%B1a+de+Cinco",
+    
+    // Colors
+    'red': "https://placehold.co/200x200/FF5733/FFFFFF?text=Se%C3%B1a+de+Rojo",
+    'blue': "https://placehold.co/200x200/3366FF/FFFFFF?text=Se%C3%B1a+de+Azul",
+    'green': "https://placehold.co/200x200/33FF57/FFFFFF?text=Se%C3%B1a+de+Verde",
+    'yellow': "https://placehold.co/200x200/FFC300/000000?text=Se%C3%B1a+de+Amarillo",
+    'white': "https://placehold.co/200x200/FFFFFF/000000?text=Se%C3%B1a+de+Blanco",
+
+    // Vocabulary
+    'hola': "https://placehold.co/200x200/C70039/FFFFFF?text=Se%C3%B1a+de+Hola",
+    'gracias': "https://placehold.co/200x200/900C3F/FFFFFF?text=Se%C3%B1a+de+Gracias",
+    'por-favor': "https://placehold.co/200x200/FF5733/FFFFFF?text=Se%C3%B1a+de+Por+favor",
+    'si': "https://placehold.co/200x200/DAF7A6/000000?text=Se%C3%B1a+de+S%C3%AD",
+    'no': "https://placehold.co/200x200/FF5733/FFFFFF?text=Se%C3%B1a+de+No",
+    'ayuda': "https://placehold.co/200x200/581845/FFFFFF?text=Se%C3%B1a+de+Ayuda"
+};
+
+// Handles page navigation by hiding and showing divs
+function showPage(pageId) {
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(page => page.classList.remove('active'));
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.classList.add('active');
+    } else {
+        console.error(`Error: No se encontró el elemento con ID '${pageId}'.`);
+    }
+}
+
+// Handles login form submission
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const nombre = document.getElementById('nombreUsuario').value;
+    localStorage.setItem('nombreUsuario', nombre);
+    document.getElementById('menu-title').textContent = `¡Hola, ${nombre}! ¿Qué quieres aprender hoy?`;
+    showPage('menu-page');
+});
+
+// Add click listeners to game menu cards
+document.getElementById('numeros-card').addEventListener('click', () => {
+    showPage('numeros-page');
+    const imgElement = document.getElementById('numero-sena');
+    if (imgElement) imgElement.src = senas['one']; // Muestra una imagen por defecto
+});
+
+document.getElementById('colores-card').addEventListener('click', () => {
+    showPage('colores-page');
+    const imgElement = document.getElementById('color-sena');
+    if (imgElement) imgElement.src = senas['red']; // Muestra una imagen por defecto
+});
+
+document.getElementById('activos-card').addEventListener('click', () => {
+    showPage('activos-page');
+});
+
+// Add click listeners to numbers and colors game items
+const gameItems = document.querySelectorAll('#numeros-page .game-card, #colores-page .game-card');
+gameItems.forEach(item => {
+    item.addEventListener('click', (event) => {
+        const senaId = event.currentTarget.dataset.senaId;
+        const imgElement = event.currentTarget.closest('.page').querySelector('.sign-image');
+        if (imgElement && senas[senaId]) {
+            imgElement.src = senas[senaId];
+        }
+    });
+});
+
+// Add click listeners to vocabulary items
+const vocabItems = document.querySelectorAll('#activos-page .vocabulary-item');
+let currentActiveItem = null;
+vocabItems.forEach(item => {
+    item.addEventListener('click', (event) => {
+        const senaId = event.currentTarget.dataset.senaId;
+        const imgElement = document.getElementById('vocabulario-sena');
+        if (imgElement && senas[senaId]) {
+            imgElement.src = senas[senaId];
+        }
+
+        // Remove 'active-word' class from the previously active item
+        if (currentActiveItem) {
+            currentActiveItem.classList.remove('active-word');
+        }
+
+        // Add 'active-word' class to the clicked item
+        event.currentTarget.classList.add('active-word');
+        currentActiveItem = event.currentTarget;
+    });
+});
+
+// Check for a saved user name on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedName = localStorage.getItem('nombreUsuario');
+    if (savedName) {
+        document.getElementById('nombreUsuario').value = savedName;
+    }
+});
+
+        
+    </script>
+</body>
+
+</html>

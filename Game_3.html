@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abecedario en Señas Nicaragüense</title>
+    <style>
+        /* Estilo general */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            color: #333;
+            text-align: center;
+        }
+
+        header {
+            background: #138496;
+            color: white;
+            padding: 20px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        /* Grid del abecedario */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .letra-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .letra-card:hover {
+            background: #007bff;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: aparecer 0.3s ease;
+        }
+
+        @keyframes aparecer {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        #cerrar {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: red;
+        }
+
+        #imagenSeña {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            margin-top: 15px;
+        }
+
+        footer {
+            margin-top: 30px;
+            padding: 15px;
+            background: #333;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>📚 Abecedario en Lengua de Señas Nicaragüense</h1>
+        <p>Haz clic en una letra para ver su seña.</p>
+    </header>
+
+    <main>
+        <div id="abecedario" class="grid"></div>
+
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span id="cerrar">&times;</span>
+                <h2 id="letraTitulo"></h2>
+                <img id="imagenSeña" src="" alt="Seña" />
+            </div>
+        </div>
+    </main>
+
+
+
+    <script>
+        // Generamos el abecedario
+        const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("");
+        const contenedor = document.getElementById("abecedario");
+
+        letras.forEach(letra => {
+            const div = document.createElement("div");
+            div.className = "letra-card";
+            div.textContent = letra;
+            div.onclick = () => mostrarModal(letra);
+            contenedor.appendChild(div);
+        });
+
+        // Modal
+        const modal = document.getElementById("modal");
+        const cerrar = document.getElementById("cerrar");
+        const letraTitulo = document.getElementById("letraTitulo");
+        const imagenSeña = document.getElementById("imagenSeña");
+
+        function mostrarModal(letra) {
+            letraTitulo.textContent = "Letra " + letra;
+            imagenSeña.src = "img/LSN/" + letra + ".png"; // aquí deben estar tus imágenes
+            modal.style.display = "flex";
+        }
+
+        cerrar.onclick = () => modal.style.display = "none";
+        window.onclick = e => { if (e.target == modal) modal.style.display = "none"; };
+
+    </script>
+</body>
+
+</html>
